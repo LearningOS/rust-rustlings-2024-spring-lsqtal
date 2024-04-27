@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -38,6 +37,13 @@ where
 
     pub fn add(&mut self, value: T) {
         //TODO
+        self.count += 1;
+        if self.count >= self.items.len() {
+            self.items.push(value);
+        } else {
+            self.items[self.count] = value;
+        }
+        self.percolate_up(self.count);
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -55,11 +61,39 @@ where
     fn right_child_idx(&self, idx: usize) -> usize {
         self.left_child_idx(idx) + 1
     }
+    
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
         //TODO
-		0
+		//0
+        let left_idx = self.left_child_idx(idx);
+        let right_idx = self.right_child_idx(idx);
+    if right_idx > self.count || (self.comparator)(&self.items[left_idx], &self.items[right_idx]) {
+        left_idx
+    } else {
+        right_idx
     }
+    }
+
+    fn percolate_up(&mut self, idx: usize) {
+        let mut idx = idx;
+        while idx > 1 && (self.comparator)(&self.items[idx], &self.items[self.parent_idx(idx)]) {
+            let xs=self.parent_idx(idx);
+            self.items.swap(idx, xs);
+            idx = self.parent_idx(idx);
+        }
+}
+fn percolate_down(&mut self, idx: usize) {
+    let mut idx = idx;
+    loop {
+        let smallest_child_idx = self.smallest_child_idx(idx);
+        if smallest_child_idx > self.count || !(self.comparator)(&self.items[smallest_child_idx], &self.items[idx]) {
+            break;
+        }
+        self.items.swap(idx, smallest_child_idx);
+        idx = smallest_child_idx;
+    }
+}
 }
 
 impl<T> Heap<T>
@@ -79,13 +113,22 @@ where
 
 impl<T> Iterator for Heap<T>
 where
-    T: Default,
+    T: Default+Clone,
 {
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
         //TODO
-		None
+		//None
+        if self.count == 0 {
+            return None;
+        }
+        let root_value = self.items[1].clone();
+        let last_value = self.items[self.count].clone();
+        self.count -= 1;
+        self.items[1] = last_value;
+        self.percolate_down(1);
+        Some(root_value)
     }
 }
 
